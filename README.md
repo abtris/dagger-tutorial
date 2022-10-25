@@ -1,6 +1,7 @@
 # Dagger SDK
 
 - https://docs.dagger.io/sdk/go/959738/get-started
+- https://www.youtube.com/watch?v=GgMskf-znh4
 
 ```
 go get dagger.io/dagger@latest
