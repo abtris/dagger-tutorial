@@ -2,7 +2,10 @@ module multibuild
 
 go 1.19
 
-require dagger.io/dagger v0.3.0
+require (
+	dagger.io/dagger v0.3.0
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+)
 
 require (
 	github.com/Khan/genqlient v0.5.0 // indirect
@@ -62,10 +65,9 @@ require (
 	go.opentelemetry.io/otel/trace v1.10.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.18.0 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
-	golang.org/x/net v0.0.0-20220811182439-13a9a731de15 // indirect
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
-	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 	google.golang.org/genproto v0.0.0-20220810155839-1856144b1d9c // indirect
 	google.golang.org/grpc v1.49.0 // indirect
