@@ -3,11 +3,12 @@ module multibuild
 go 1.20
 
 require (
-	dagger.io/dagger v0.7.0
+	dagger.io/dagger v0.7.1
 	golang.org/x/sync v0.2.0
 )
 
 require (
+	github.com/99designs/gqlgen v0.17.2 // indirect
 	github.com/Khan/genqlient v0.5.0 // indirect
 	github.com/adrg/xdg v0.4.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
