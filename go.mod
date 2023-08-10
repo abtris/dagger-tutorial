@@ -3,7 +3,7 @@ module multibuild
 go 1.20
 
 require (
-	dagger.io/dagger v0.7.4
+	dagger.io/dagger v0.8.1
 	golang.org/x/sync v0.3.0
 )
 
