@@ -7,21 +7,65 @@ import (
 	"path/filepath"
 
 	"dagger.io/dagger"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"golang.org/x/sync/errgroup"
 )
+
+func newTraceProvider(exp sdktrace.SpanExporter) *sdktrace.TracerProvider {
+	// Ensure default SDK resources and the required service name are set.
+	r, err := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName("DaggerService"),
+		),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exp),
+		sdktrace.WithResource(r),
+	)
+}
 
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("must pass in a git repo to build")
 		os.Exit(1)
 	}
+	ctx := context.Background()
+	client := otlptracehttp.NewClient()
+	exporter, err := otlptrace.New(ctx, client)
+	if err != nil {
+		fmt.Errorf("creating OTLP trace exporter: %w", err)
+	}
+	tp := newTraceProvider(exporter)
+
+	// Handle shutdown properly so nothing leaks.
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	otel.SetTracerProvider(tp)
+
 	repo := os.Args[1]
 	if err := build(repo); err != nil {
 		fmt.Println(err)
 	}
 }
 
+const name = "multibuild"
+
 func build(repoUrl string) error {
+	_, span := otel.Tracer(name).Start(context.Background(), "Run")
+	defer span.End()
+
 	fmt.Printf("Building %s\n", repoUrl)
 
 	ctx := context.Background()
