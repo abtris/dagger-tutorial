@@ -55,20 +55,19 @@ func main() {
 	otel.SetTracerProvider(tp)
 
 	repo := os.Args[1]
-	if err := build(repo); err != nil {
+	if err := build(ctx, repo); err != nil {
 		fmt.Println(err)
 	}
 }
 
 const name = "multibuild"
 
-func build(repoUrl string) error {
-	_, span := otel.Tracer(name).Start(context.Background(), "Run")
+func build(ctx context.Context, repoUrl string) error {
+	_, span := otel.Tracer(name).Start(ctx, "Run")
 	defer span.End()
 
 	fmt.Printf("Building %s\n", repoUrl)
 
-	ctx := context.Background()
 	g, ctx := errgroup.WithContext(ctx)
 
 	oses := []string{"linux", "darwin"}
@@ -85,12 +84,16 @@ func build(repoUrl string) error {
 	src := repo.Branch("main").Tree()
 
 	for _, version := range goVersions {
+		ctx, span := otel.Tracer(name).Start(ctx, fmt.Sprintf("span-%s", version))
+
 		imageTag := fmt.Sprintf("golang:%s", version)
 		golang := client.Container().From(imageTag)
 		golang = golang.WithMountedDirectory("/src", src).WithWorkdir("/src")
 
 		for _, goos := range oses {
+			ctx, span := otel.Tracer(name).Start(ctx, fmt.Sprintf("span-%s", goos))
 			for _, goarch := range arches {
+				ctx, span := otel.Tracer(name).Start(ctx, fmt.Sprintf("span-%s", goarch))
 				goos, goarch, version := goos, goarch, version
 				g.Go(func() error {
 					path := fmt.Sprintf("build/%s/%s/%s/", version, goos, goarch)
@@ -113,8 +116,11 @@ func build(repoUrl string) error {
 
 					return nil
 				})
+				span.End()
 			}
+			span.End()
 		}
+		span.End()
 	}
 	if err := g.Wait(); err != nil {
 		return err

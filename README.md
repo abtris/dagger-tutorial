@@ -42,3 +42,27 @@ otel-desktop-viewer
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 otel-cli exec --service dagger --name "multibuild" ./multibuild https://github.com/kpenfound/greetings-api.git
 ```
+
+
+## Run manual instrumented 
+
+- 1st terminal
+
+```
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+otel-desktop-viewer
+```
+
+- 2nd terminal
+
+```
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+go build
+./multibuild https://github.com/kpenfound/greetings-api.git
+```
+
+Screenshot from otel-desktop-viewer
+
+![](traces.png)
