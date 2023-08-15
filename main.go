@@ -38,12 +38,7 @@ func build(repoUrl string) error {
 	defer client.Close()
 
 	repo := client.Git(repoUrl)
-	src, err := repo.Branch("main").Tree().ID(ctx)
-	if err != nil {
-		return err
-	}
-
-	workdir := client.Host().Workdir()
+	src := repo.Branch("main").Tree()
 
 	for _, version := range goVersions {
 		imageTag := fmt.Sprintf("golang:%s", version)
@@ -63,19 +58,15 @@ func build(repoUrl string) error {
 
 					build := golang.WithEnvVariable("GOOS", goos)
 					build = build.WithEnvVariable("GOARCH", goarch)
-					build = build.Exec(dagger.ContainerExecOpts{
-						Args: []string{"go", "build", "-o", path},
-					})
+					build = build.WithExec([]string{"go", "build", "-o", path})
 
-					output, err := build.Directory(path).ID(ctx)
+					output := build.Directory(path)
+
+					_, err = output.Export(ctx, path)
 					if err != nil {
 						return err
 					}
 
-					_, err = workdir.Write(ctx, output, dagger.HostDirectoryWriteOpts{Path: path})
-					if err != nil {
-						return err
-					}
 					return nil
 				})
 			}
