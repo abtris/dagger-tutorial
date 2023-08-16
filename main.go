@@ -8,6 +8,7 @@ import (
 
 	"dagger.io/dagger"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -85,6 +86,7 @@ func build(ctx context.Context, repoUrl string) error {
 
 	for _, version := range goVersions {
 		ctx, span := otel.Tracer(name).Start(ctx, fmt.Sprintf("span-%s", version))
+		span.SetAttributes(attribute.Bool("isCached", false))
 
 		imageTag := fmt.Sprintf("golang:%s", version)
 		golang := client.Container().From(imageTag)
