@@ -5,9 +5,7 @@
 
 ```
 go get dagger.io/dagger@latest
-go mod edit -replace github.com/docker/docker=github.com/docker/docker@v20.10.3-0.20220414164044-61404de7df1a+incompatible
-````
-
+```
 
 ```
 go build
@@ -30,6 +28,7 @@ brew install otel-desktop-viewer otel-cli
 - 1st terminal
 
 ```
+export OTEL_SERVICE_NAME="dagger"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"

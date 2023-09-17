@@ -12,29 +12,24 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/errgroup"
 )
 
-func newTraceProvider(exp sdktrace.SpanExporter) *sdktrace.TracerProvider {
-	// Ensure default SDK resources and the required service name are set.
-	r, err := resource.Merge(
-		resource.Default(),
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("DaggerService"),
-		),
-	)
+const (
+	instrumentationName    = "github.com/abtris/dagger-tutorial"
+	instrumentationVersion = "0.1.0"
+)
 
-	if err != nil {
-		panic(err)
-	}
-
-	return sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exp),
-		sdktrace.WithResource(r),
+var (
+	tracer = otel.GetTracerProvider().Tracer(
+		instrumentationName,
+		trace.WithInstrumentationVersion(instrumentationVersion),
+		trace.WithSchemaURL(semconv.SchemaURL),
 	)
-}
+	sc trace.SpanContext
+)
 
 func main() {
 	if len(os.Args) < 2 {
@@ -42,17 +37,20 @@ func main() {
 		os.Exit(1)
 	}
 	ctx := context.Background()
-	client := otlptracehttp.NewClient()
+	opts := otlptracehttp.WithInsecure()
+	client := otlptracehttp.NewClient(opts)
 	exporter, err := otlptrace.New(ctx, client)
 	if err != nil {
 		fmt.Errorf("creating OTLP trace exporter: %w", err)
 	}
-	tp := newTraceProvider(exporter)
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(resource.Default()),
+	)
+	otel.SetTracerProvider(tracerProvider)
 
 	// Handle shutdown properly so nothing leaks.
-	defer func() { _ = tp.Shutdown(ctx) }()
-
-	otel.SetTracerProvider(tp)
+	defer func() { _ = tracerProvider.Shutdown(ctx) }()
 
 	repo := os.Args[1]
 	if err := build(ctx, repo); err != nil {
@@ -60,42 +58,42 @@ func main() {
 	}
 }
 
-const name = "multibuild"
-
 func build(ctx context.Context, repoUrl string) error {
-	_, span := otel.Tracer(name).Start(ctx, "Run")
+	ctx, span := tracer.Start(ctx, "build")
 	defer span.End()
-
 	fmt.Printf("Building %s\n", repoUrl)
 
 	g, ctx := errgroup.WithContext(ctx)
 
 	oses := []string{"linux", "darwin"}
 	arches := []string{"amd64", "arm64"}
-	goVersions := []string{"1.18", "1.19"}
+	goVersions := []string{"1.20", "1.21"}
 
+	ctx, span = tracer.Start(ctx, "initDagger")
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return err
 	}
+	span.End()
 	defer client.Close()
 
 	repo := client.Git(repoUrl)
 	src := repo.Branch("main").Tree()
 
 	for _, version := range goVersions {
-		ctx, span := otel.Tracer(name).Start(ctx, fmt.Sprintf("span-%s", version))
-
+		ctx, span := tracer.Start(ctx, fmt.Sprintf("go-%s", version))
+		defer span.End()
 		imageTag := fmt.Sprintf("golang:%s", version)
 		golang := client.Container().From(imageTag)
 		golang = golang.WithMountedDirectory("/src", src).WithWorkdir("/src")
 
 		for _, goos := range oses {
-			ctx, span := otel.Tracer(name).Start(ctx, fmt.Sprintf("span-%s", goos))
+			ctx, span := tracer.Start(ctx, fmt.Sprintf("os-%s", goos))
+			defer span.End()
 			for _, goarch := range arches {
-				ctx, span := otel.Tracer(name).Start(ctx, fmt.Sprintf("span-%s", goarch))
-				goos, goarch, version := goos, goarch, version
 				g.Go(func() error {
+					ctx, span := tracer.Start(ctx, fmt.Sprintf("arch-%s", goarch))
+					goos, goarch, version := goos, goarch, version
 					path := fmt.Sprintf("build/%s/%s/%s/", version, goos, goarch)
 					outpath := filepath.Join(".", path)
 					err = os.MkdirAll(outpath, os.ModePerm)
@@ -113,14 +111,11 @@ func build(ctx context.Context, repoUrl string) error {
 					if err != nil {
 						return err
 					}
-
+					span.End()
 					return nil
 				})
-				span.End()
 			}
-			span.End()
 		}
-		span.End()
 	}
 	if err := g.Wait(); err != nil {
 		return err
