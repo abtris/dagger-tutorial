@@ -69,10 +69,12 @@ func build(ctx context.Context, repoUrl string) error {
 	arches := []string{"amd64", "arm64"}
 	goVersions := []string{"1.20", "1.21"}
 
+	ctx, span = tracer.Start(ctx, "initDagger")
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return err
 	}
+	span.End()
 	defer client.Close()
 
 	repo := client.Git(repoUrl)
