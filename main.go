@@ -80,17 +80,18 @@ func build(ctx context.Context, repoUrl string) error {
 
 	for _, version := range goVersions {
 		ctx, span := tracer.Start(ctx, fmt.Sprintf("go-%s", version))
-
+		defer span.End()
 		imageTag := fmt.Sprintf("golang:%s", version)
 		golang := client.Container().From(imageTag)
 		golang = golang.WithMountedDirectory("/src", src).WithWorkdir("/src")
 
 		for _, goos := range oses {
 			ctx, span := tracer.Start(ctx, fmt.Sprintf("os-%s", goos))
+			defer span.End()
 			for _, goarch := range arches {
-				ctx, span := tracer.Start(ctx, fmt.Sprintf("arch-%s", goarch))
-				goos, goarch, version := goos, goarch, version
 				g.Go(func() error {
+					ctx, span := tracer.Start(ctx, fmt.Sprintf("arch-%s", goarch))
+					goos, goarch, version := goos, goarch, version
 					path := fmt.Sprintf("build/%s/%s/%s/", version, goos, goarch)
 					outpath := filepath.Join(".", path)
 					err = os.MkdirAll(outpath, os.ModePerm)
@@ -108,14 +109,11 @@ func build(ctx context.Context, repoUrl string) error {
 					if err != nil {
 						return err
 					}
-
+					span.End()
 					return nil
 				})
-				span.End()
 			}
-			span.End()
 		}
-		span.End()
 	}
 	if err := g.Wait(); err != nil {
 		return err
