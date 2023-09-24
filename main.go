@@ -8,6 +8,8 @@ import (
 
 	"dagger.io/dagger"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -70,8 +72,12 @@ func build(ctx context.Context, repoUrl string) error {
 	goVersions := []string{"1.20", "1.21"}
 
 	ctx, span = tracer.Start(ctx, "initDagger")
+	span.AddEvent("start init dagger")
+	span.SetAttributes(attribute.Bool("cache", true))
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		span.RecordError(err)
 		return err
 	}
 	span.End()
@@ -82,6 +88,7 @@ func build(ctx context.Context, repoUrl string) error {
 
 	for _, version := range goVersions {
 		ctx, span := tracer.Start(ctx, fmt.Sprintf("go-%s", version))
+		span.AddEvent("go versions")
 		defer span.End()
 		imageTag := fmt.Sprintf("golang:%s", version)
 		golang := client.Container().From(imageTag)
@@ -98,6 +105,8 @@ func build(ctx context.Context, repoUrl string) error {
 					outpath := filepath.Join(".", path)
 					err = os.MkdirAll(outpath, os.ModePerm)
 					if err != nil {
+						span.SetStatus(codes.Error, err.Error())
+						span.RecordError(err)
 						return err
 					}
 
@@ -109,6 +118,8 @@ func build(ctx context.Context, repoUrl string) error {
 
 					_, err = output.Export(ctx, path)
 					if err != nil {
+						span.SetStatus(codes.Error, err.Error())
+						span.RecordError(err)
 						return err
 					}
 					span.End()
@@ -118,6 +129,8 @@ func build(ctx context.Context, repoUrl string) error {
 		}
 	}
 	if err := g.Wait(); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		span.RecordError(err)
 		return err
 	}
 	return nil
