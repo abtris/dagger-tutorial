@@ -57,9 +57,20 @@ otel-desktop-viewer
 - 2nd terminal
 
 ```
+export OTEL_SERVICE_NAME="dagger"
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 go build
 ./multibuild https://github.com/kpenfound/greetings-api.git
+```
+
+
+## Honeycomb
+
+```
+export OTEL_USE_HTTPS="true"
+export OTEL_SERVICE_NAME="dagger"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://api.honeycomb.io:443"
+export OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=<API-KEY>,x-honeycomb-dataset=dagger"
 ```
 
 Screenshot from otel-desktop-viewer

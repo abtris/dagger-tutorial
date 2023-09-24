@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"time"
 
 	"dagger.io/dagger"
 	"go.opentelemetry.io/otel"
@@ -39,7 +41,16 @@ func main() {
 		os.Exit(1)
 	}
 	ctx := context.Background()
-	opts := otlptracehttp.WithInsecure()
+
+	httpsEnabledString := os.Getenv("OTEL_USE_HTTPS")
+	httpsEnabled, err := strconv.ParseBool(httpsEnabledString)
+	if err != nil {
+		fmt.Errorf("Error parse OTEL_USE_HTTPS")
+	}
+	opts := otlptracehttp.WithTimeout(30 * time.Second)
+	if !httpsEnabled {
+		opts = otlptracehttp.WithInsecure()
+	}
 	client := otlptracehttp.NewClient(opts)
 	exporter, err := otlptrace.New(ctx, client)
 	if err != nil {
