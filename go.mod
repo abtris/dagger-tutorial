@@ -3,7 +3,7 @@ module multibuild
 go 1.21
 
 require (
-	dagger.io/dagger v0.9.7
+	dagger.io/dagger v0.9.8
 	go.opentelemetry.io/otel v1.22.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.22.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.22.0
@@ -26,7 +26,7 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.9 // indirect
 	go.opentelemetry.io/otel/metric v1.22.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
-	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
+	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
