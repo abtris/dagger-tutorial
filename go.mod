@@ -1,6 +1,6 @@
 module multibuild
 
-go 1.21
+go 1.22.2
 
 require (
 	dagger.io/dagger v0.11.2
