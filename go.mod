@@ -9,7 +9,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.28.0
 	go.opentelemetry.io/otel/sdk v1.28.0
 	go.opentelemetry.io/otel/trace v1.28.0
-	golang.org/x/sync v0.7.0
+	golang.org/x/sync v0.8.0
 )
 
 require (
