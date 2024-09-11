@@ -3,7 +3,7 @@ module multibuild
 go 1.22.2
 
 require (
-	dagger.io/dagger v0.12.7
+	dagger.io/dagger v0.13.0
 	go.opentelemetry.io/otel v1.30.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.30.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.30.0
