@@ -3,7 +3,7 @@ module multibuild
 go 1.22.2
 
 require (
-	dagger.io/dagger v0.13.0
+	dagger.io/dagger v0.13.1
 	go.opentelemetry.io/otel v1.30.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.30.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.30.0
@@ -15,7 +15,7 @@ require (
 require (
 	github.com/99designs/gqlgen v0.17.49 // indirect
 	github.com/Khan/genqlient v0.7.0 // indirect
-	github.com/adrg/xdg v0.4.0 // indirect
+	github.com/adrg/xdg v0.5.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
