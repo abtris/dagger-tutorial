@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.25.1
 
 require (
-	dagger.io/dagger v0.18.16
+	dagger.io/dagger v0.18.17
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.38.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.38.0
