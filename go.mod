@@ -5,7 +5,7 @@ go 1.25.0
 toolchain go1.26.2
 
 require (
-	dagger.io/dagger v0.20.3
+	dagger.io/dagger v0.20.4
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.43.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.43.0
@@ -15,7 +15,7 @@ require (
 )
 
 require (
-	github.com/99designs/gqlgen v0.17.81 // indirect
+	github.com/99designs/gqlgen v0.17.89 // indirect
 	github.com/Khan/genqlient v0.8.1 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -25,8 +25,8 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
-	github.com/sosodev/duration v1.3.1 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.30 // indirect
+	github.com/sosodev/duration v1.4.0 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.32 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.10.0 // indirect
