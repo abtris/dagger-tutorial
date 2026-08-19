@@ -2,7 +2,7 @@ module multibuild
 
 go 1.26.1
 
-toolchain go1.26.6
+toolchain go1.27.0
 
 require (
 	dagger.io/dagger v0.21.8
